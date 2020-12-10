@@ -12,23 +12,6 @@ def register(request):
         return redirect('/login/')
 
 
-def login(request):
-    if request.method == 'GET':
-        username = request.COOKIES.get('username', '')
-        return render(request, 'login.html', context={'username': username})
-    else:
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        remeber = request.POST.get('remeber')
-        try:
-            user = Users.objects.get(username=username, password=password)
-        except Users.DoesNotExist:
-            return JsonResponse({'message': 'login failed'})
-        else:
-            response = JsonResponse({'message': 'login success'})
-            if remeber == 'true':
-                response.set_cookie('username', username, max_age=14 * 24 * 3600)
-            return response
 
 
 
@@ -45,3 +28,25 @@ def user_info(request, id):
             'age': user.age
         }
         return JsonResponse(res_data)
+
+
+from django.views import View
+
+class LoginView(View):
+    def get(self, request):
+        username = request.COOKIES.get('username', '')
+        return render(request, 'login.html', context={'username': username})
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remeber = request.POST.get('remeber')
+        try:
+            user = Users.objects.get(username=username, password=password)
+        except Users.DoesNotExist:
+            return JsonResponse({'message': 'login failed'})
+        else:
+            response = JsonResponse({'message': 'login success'})
+            if remeber == 'true':
+                response.set_cookie('username', username, max_age=14 * 24 * 3600)
+            return response
