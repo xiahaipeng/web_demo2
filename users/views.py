@@ -14,13 +14,18 @@ def register(request):
 
 def login(request):
     if request.method == 'GET':
-        return render(request, 'login.html')
+        username = request.COOKIES.get('username', '')
+        return render(request, 'login.html', context={'username': username})
     else:
         username = request.POST.get('username')
         password = request.POST.get('password')
+        remeber = request.POST.get('remeber')
         try:
             user = Users.objects.get(username=username, password=password)
         except Users.DoesNotExist:
             return JsonResponse({'message': 'login failed'})
         else:
-            return JsonResponse({'message': 'login success'})
+            response = JsonResponse({'message': 'login success'})
+            if remeber == 'true':
+                response.set_cookie('username', username, max_age=14 * 24 * 3600)
+            return response
